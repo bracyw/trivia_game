@@ -1,0 +1,55 @@
+question: Which song on Daft Punk&#039;s &quot;Random Access Memories&quot; features Pharrell Williams?
+correct answer: Get Lucky
+wrong answers:Doin&#039; It Right, Instant Crush, The Game of Love
+
+question: Who was featured in the song &quot;Words&quot; by Feint? 
+correct answer: Laura Brehm
+wrong answers: Anna Yvette, Danyka Nadeau, Veela
+
+question: Which of these is the name of a song by Tears for Fears?
+correct answer: Shout
+wrong answers:Scream, Yell, Shriekquestion: What does film maker Dan Bell typically focus his films on?
+correct answer: Abandoned Buildings and Dead Malls
+wrong answers: Historic Landmarks, Action Films, Documentaries , 
+question: Which actress married Michael Douglas in 2000?
+correct answer: Catherine Zeta-Jones
+wrong answers: Ruth Jones, Pam Ferris, Sara Sugarman, 
+question: What was James Coburn&#039;s last film role before his death?
+correct answer: American Gun
+wrong answers: Monsters Inc, Texas Rangers, Snow Dogs, 
+question: What was the cause of Marilyn Monroes suicide?
+correct answer: Drug Overdose
+wrong answers: Knife Attack, House Fire, Gunshot, 
+question: Which Van Gogh painting depicts the view from his asylum in Saint-R&eacute;my-de-Provence in southern France?
+correct answer: The Starry Night
+wrong answers: Wheatfields with Crows, The Sower with Setting Sun, The Church at Auvers, 
+question: Which painting was not made by Vincent Van Gogh?
+correct answer: The Ninth Wave
+wrong answers: Caf&eacute; Terrace at Night, Bedroom In Arles, Starry Night, 
+question: What is the name of the Japanese art of folding paper into decorative shapes and figures?
+correct answer: Origami
+wrong answers: Sumi-e, Ukiyo-e, Haiku, 
+question: Who painted the Sistine Chapel?
+correct answer: Michelangelo
+wrong answers: Leonardo da Vinci, Pablo Picasso, Raphael, 
+question: Who painted &quot;Swans Reflecting Elephants&quot;, &quot;Sleep&quot;, and &quot;The Persistence of Memory&quot;?
+correct answer: Salvador Dali
+wrong answers: Jackson Pollock, Vincent van Gogh, Edgar Degas, 
+question: According to the United States Constitution, how old must a person be to be elected President of the United States?
+correct answer: 35
+wrong answers: 30, 40, 45, 
+question: Who was the 45th President of the United States?
+correct answer: Donald Trump
+wrong answers: Barack Obama, Bill Clinton, George Bush, 
+question: Who painted the Sistine Chapel?
+correct answer: Michelangelo
+wrong answers: Leonardo da Vinci, Pablo Picasso, Raphael, 
+question: Who painted the biblical fresco The Creation of Adam?
+correct answer: Michelangelo
+wrong answers: Leonardo da Vinci, Caravaggio, Rembrandt, 
+question: Which Van Gogh painting depicts the view from his asylum in Saint-R&eacute;my-de-Provence in southern France?
+correct answer: The Starry Night
+wrong answers: Wheatfields with Crows, The Sower with Setting Sun, The Church at Auvers, 
+question: Who painted the Mona Lisa?
+correct answer: Leonardo da Vinci 
+wrong answers: Pablo Picasso,  Vincent van Gogh, Michelangelo, 
