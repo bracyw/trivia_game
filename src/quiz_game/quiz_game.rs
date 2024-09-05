@@ -1,23 +1,98 @@
-use std::{any::Any, collections::HashMap, fmt::Display, fs::OpenOptions, io::{stdin, Read, Write}, str::FromStr, thread, time::Duration};
-use rand::{seq::IteratorRandom, thread_rng, Error};
-use reqwest::get;
+use std::{fmt::Display, fs::OpenOptions, io::{stdin, Write}, str::FromStr, thread, time::Duration};
+use rand::{seq::IteratorRandom, thread_rng};
 use serde::Deserialize;
-use core::hash::Hash;
+use core::{hash::Hash};
+use indexmap::IndexMap;
 
-pub(crate) async fn play_quiz_game() {
-    /*  
-    1. ask for how many questions, and what catagory
-    2. get that amount from the api (with a random gen key)
-    3. parse through the info -> (put the type of trivia), (question), (save correct answer), 
-    4. put all answers in random order into a random map (or whatever)
-    5. print first question with type and answers ^
-    6. log response (repeat 5 and 6 for all q's)
-    7. for each question check right answer against log response
-    8. print each check as you take it.
-    */
-
+/// This is the main function for starting the trivia game.
+/// 
+/// This function should continue until the user either quits using the command line.
+/// #### !! is dependent on the following api used for the substance of the game: https://opentdb.com/api_config.php
+pub(crate) async fn play_trivia_game() {
     println!("Press q to quit at any time.");
-    // category function
+    let user_choices = user_trivia_menu().await; // see user trivia 
+    let questions = req_api_questions(user_choices.0, user_choices.1, user_choices.2).await;
+    save_real_json(&questions);
+    let mut answers = IndexMap::new();
+    let mut rng = thread_rng(); // for randomizing question order
+    let mut hms_questions:Vec<String> = Vec::new(); // used for storing all the formatting logic (which is used when displaying correct answer later)
+    for question in questions.iter() {
+        // end formatting will look like this 
+        // What is hublahbluh?  question type: General
+        //      a. ()
+        //      ...
+        // please enter your answer (a letter bozo): !!! make into own function for get letter !!!
+
+        let mut all_q_answers:Vec<String> = Vec::new(); // for storing all formatted questions (with rand order answers), for easy printing
+        all_q_answers.append(&mut question.incorrect_answers.clone()); 
+        all_q_answers.push(question.correct_answer.clone());
+
+        let question_n_type = format!("{},   question type: {}", question.question, question.r#type);
+        println!("{question_n_type}");
+        let mut hms_question = question_n_type;
+        // this loop is for randomizing all of an question answers (because otherwise the correct answer would be last every time)
+        for x in 0..all_q_answers.len() {
+            let letter = match x {
+                0 => 'a',
+                1 => 'b',
+                2 => 'c',
+                3 => 'd',
+                _ => panic!("why are there soooo many answers????"),
+            };
+            // get the random_q and remove it from the possible list (so we slowly eliminate already choosen questions)
+            let cloned_answers = all_q_answers.clone();
+            let random_q =  cloned_answers.iter().choose(&mut rng).unwrap();
+            all_q_answers.swap_remove(all_q_answers.iter().position(|s| s == random_q).unwrap());
+            // format and print the random singular answer
+            let one_answer = format!("  {letter}. {}", random_q);
+            println!("{one_answer}");
+            hms_question = hms_question + "\n" + &one_answer;
+        }
+        hms_questions.push(hms_question);
+        println!("Please enter the letter for your answer: ");
+        let answer: String = get_user_input();
+        println!("\n");
+        
+        // save answer in answer, WHERE I ADD IT
+        answers.insert(question, answer.clone());
+    }
+
+
+    // new function bellow 
+    println!("HERE ARE YOUR ANSWERS!!!!\n\n");
+    let mut question_num = 0;
+    for answer in answers {
+        println!("{}", hms_questions[question_num]);
+        let mut full_answer = String::new();
+        // put together the original question again.
+        for line in hms_questions[question_num].lines() {
+            // check if the answer recorded actually exists...
+            if line.find(&(answer.1.to_owned() + ".")).is_some() {
+                // and then set the full answer to the full string of the answer 
+                // for example:
+                //      What is the capital of your mom?
+                //          a. (<- first three characters are the letter '.' and a space) then we compare the rest to the nicely formatted saved question.
+                //          b. 
+                //          c. (lets say for some reason I fucked up the code, then the full answer will never be found... which could cause other issues?)
+                full_answer = line.trim().get(3..).expect("WTFFF").to_owned();
+            }
+        }
+        let end_of_check_answer_msg = if answer.0.correct_answer == full_answer.trim() {
+                 "... was CORRECT!!!"
+        } else {
+            &format!("... was incorrect :(, the correct answer was {}", answer.0.correct_answer) as &str
+        };
+        let checked_answer_msg = format!("Your answer of {}", answer.1) + end_of_check_answer_msg + "\n";
+        println!("{checked_answer_msg}");
+        question_num = question_num + 1;
+    }
+}
+
+
+/// This function is used for prompting and recording the options users have for trivia.
+/// 
+/// It allows the user to choose the number of question, category id, and difficulty; returns those values.
+async fn user_trivia_menu() -> (u32, u32, Difficulty) {
     let cats = trivia_req_api_categorys().await;
     println!("Please enter one of the categories of trivia to play (enter number to choose):");
     let mut cat_num: u32 = 0;
@@ -43,67 +118,8 @@ pub(crate) async fn play_quiz_game() {
     };
     println!("Please enter the number of questions you want (maximum is {}, based on category {} and difficulty {}):", max_qs, cats[cat_index].name, difficulty);
     let num_qs: u32 = get_user_input().parse().expect("fadlkfj");
-    let questions = req_api_questions(num_qs, cats[cat_index].id, difficulty).await;
-    save_real_json(&questions);
-    let mut answers = HashMap::new();
-    let mut rng = thread_rng(); // for randomizing question order
-    let mut formated_questions:Vec<String> = Vec::new(); // used for storing all the formatting logic (which is used when displaying correct answer later)
-    for question in questions.iter() {
-        // What is hublahbluh?  question type: General
-        //  a. ()
-        // ...
-        // please enter your answer (a letter bozo): !!! make into own function for get letter !!!
-        let mut all_answers:Vec<String> = Vec::new();
-        all_answers.append(&mut question.incorrect_answers.clone());
-        all_answers.push(question.correct_answer.clone());
-        let mut formated_question: String = String::new();
-        let question_n_type = format!("{},   question type: {}", question.question, question.r#type);
-        println!("{question_n_type}");
-        formated_question = question_n_type;
-        for x in 0..all_answers.len() {
-            let letter = match x {
-                0 => 'a',
-                1 => 'b',
-                2 => 'c',
-                3 => 'd',
-                4 => 'f',
-                5 => 'g',
-                _ => panic!("why are there soooo many answers????"),
-            };
-            // get the random_q and remove it from the possible list
-            let cloned_answers = all_answers.clone();
-            let random_q =  cloned_answers.iter().choose(&mut rng).unwrap();
-            all_answers.swap_remove(all_answers.iter().position(|s| s == random_q).unwrap());
-            let one_answer = format!("  {letter}. {}", random_q);
-            println!("{one_answer}");
-            formated_question = formated_question + "\n" + &one_answer;
-        }
-        formated_questions.push(formated_question);
-        println!("Please enter the letter for your answer: ");
-        let answer = get_user_input();
-        // save answer in answer 
-        answers.insert(question, answer);
-    }
 
-    println!("HERE ARE YOUR ANSWERS!!!!");
-    let mut question_num = 0;
-    for answer in answers {
-        println!("{}", formated_questions[question_num]);
-        let mut full_answer = String::new();
-        for line in formated_questions[question_num].lines() {
-            if line.find(&(answer.1.to_owned() + ".")).is_some() {
-                full_answer = line.trim().get(3..).expect("WTFFF").to_owned();
-            }
-        }
-        let end_of_check_answer_msg = if answer.0.correct_answer == full_answer.trim() {
-                 "... was CORRECT!!!"
-        } else {
-            &format!("... was incorrect :(, the correct answer was {}", answer.0.correct_answer) as &str
-        };
-        let checked_answer_msg = format!("Your answer of {}", answer.1) + end_of_check_answer_msg;
-        println!("{checked_answer_msg}");
-        question_num = question_num + 1;
-    }
+    return (num_qs, cats[cat_index].id, difficulty)
 }
 
 enum Difficulty {
@@ -116,7 +132,7 @@ impl Display for Difficulty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
             Self::EASY => return write!(f, "easy"),
-            Self::MEDUIM => return write!(f, "meduim"),
+            Self::MEDUIM => return write!(f, "medium"),
             Self::HARD => return write!(f, "hard")
         } 
     }
