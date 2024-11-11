@@ -1,1 +1,1 @@
-Essentially of cli for: https://opentdb.com/api_config.php
+Essentially a cli for: https://opentdb.com/api_config.php
